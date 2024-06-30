@@ -16,25 +16,6 @@ sizes = {
     'P': (640, 360)    # Pequeno
 }
 
-# Pergunta ao usuário o tamanho da tela
-print("Escolha o tamanho da tela (grande [G], medio [M], pequeno [P]): ", end="")
-tamanho_tela = input().strip().upper()
-
-# Define as dimensões da tela com base na escolha do usuário
-screen_largura, screen_altura = sizes.get(tamanho_tela, (880, 495))
-screen = pygame.display.set_mode((screen_largura, screen_altura))
-
-# Pergunta ao usuário o coeficiente de restituição
-while True:
-    try:
-        coef_restituicao = float(input("Digite o coeficiente de restituição (entre 0 e 1.5): ").strip())
-        if 0 <= coef_restituicao <= 1.5:
-            break
-        else:
-            print("Digite um valor entre 0 e 1.5.")
-    except ValueError:
-        print("Digite um valor numérico válido.")
-
 # Cor do fundo
 preto = (0, 0, 0)
 
@@ -56,7 +37,7 @@ class Ball:
     def desenhar_bola(self, screen):
         pygame.draw.circle(screen, self.cor, (int(self.x), int(self.y)), self.raio)
 
-def colisoes_bolas(bola1, bola2):
+def colisoes_bolas(bola1, bola2, coef_restituicao):
     dx = bola2.x - bola1.x
     dy = bola2.y - bola1.y
     distancia = math.hypot(dx, dy)
@@ -80,7 +61,7 @@ def colisoes_bolas(bola1, bola2):
         v2r = bola2.vx * cosseno + bola2.vy * seno
         v2t = -bola2.vx * seno + bola2.vy * cosseno
 
-        # Velocidade do centro de massaa ao longo da linha de colisão
+        # Velocidade do centro de massa ao longo da linha de colisão
         vcm = (v1r * bola1.massa + v2r * bola2.massa) / (bola1.massa + bola2.massa)
 
         # Novas velocidades radiais após a colisão com coeficiente de restituição
@@ -94,7 +75,7 @@ def colisoes_bolas(bola1, bola2):
         bola2.vx = v2r_final * cosseno - v2t * seno
         bola2.vy = v2r_final * seno + v2t * cosseno
 
-def colisoes_paredes(ball):
+def colisoes_paredes(ball, screen_largura, screen_altura):
     # Verifica colisão com a parede esquerda
     if ball.x - ball.raio < 0:
         ball.x = ball.raio
@@ -115,10 +96,29 @@ def colisoes_paredes(ball):
 
 # Função principal
 def main():
+    # Pergunta ao usuário o tamanho da tela
+    print("Escolha o tamanho da tela (grande [G], medio [M], pequeno [P]): ", end="")
+    tamanho_tela = input().strip().upper()
+
+    # Define as dimensões da tela com base na escolha do usuário
+    screen_largura, screen_altura = sizes.get(tamanho_tela, (880, 495))
+    screen = pygame.display.set_mode((screen_largura, screen_altura))
+
+    # Pergunta ao usuário o coeficiente de restituição
+    while True:
+        try:
+            coef_restituicao = float(input("Digite o coeficiente de restituição (entre 0 e 1.5): ").strip())
+            if 0 <= coef_restituicao <= 1.5:
+                break
+            else:
+                print("Digite um valor entre 0 e 1.5.")
+        except ValueError:
+            print("Digite um valor numérico válido.")
+
     num_bolas = int(input("Digite o número de bolas: "))
     massas = []
     for i in range(num_bolas):
-        massa = float(input(f"Digite a massaa da bola {i+1}: "))
+        massa = float(input(f"Digite a massa da bola {i+1}: "))
         massas.append(massa)
     
     balls = []
@@ -145,11 +145,11 @@ def main():
 
         for i in range(num_bolas):
             for j in range(i + 1, num_bolas):
-                colisoes_bolas(balls[i], balls[j])
+                colisoes_bolas(balls[i], balls[j], coef_restituicao)
 
         for ball in balls:
             ball.mover_bola()
-            colisoes_paredes(ball)
+            colisoes_paredes(ball, screen_largura, screen_altura)
             ball.desenhar_bola(screen)
 
         pygame.display.flip()
