@@ -115,8 +115,11 @@ def main():
         except ValueError:
             print("Digite um valor numérico válido.")
 
+    # Pergunta ao usuário o número de bolas
     num_bolas = int(input("Digite o número de bolas: "))
     massas = []
+
+    # Coleta a massa de cada bola
     for i in range(num_bolas):
         massa = float(input(f"Digite a massa da bola {i+1}: "))
         massas.append(massa)
@@ -124,6 +127,7 @@ def main():
     balls = []
     raio_constante = 10  # Constante para calcular o raio
 
+    # Inicializa as bolas com posições, cores e velocidades aleatórias
     for massa in massas:
         raio = int(math.log(massa + 1) * raio_constante)  # ln para normalizar visualmente o tam das bolas
         x = random.randint(raio, screen_largura - raio)
@@ -141,18 +145,24 @@ def main():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE):
                 rodando = False
 
+        # Limpa a tela a cada quadro
         screen.fill(preto)
 
+        # Verifica colisões entre as bolas
         for i in range(num_bolas):
             for j in range(i + 1, num_bolas):
                 colisoes_bolas(balls[i], balls[j], coef_restituicao)
 
+        # Move e desenha cada bola, verificando colisões com as paredes
         for ball in balls:
             ball.mover_bola()
             colisoes_paredes(ball, screen_largura, screen_altura)
             ball.desenhar_bola(screen)
 
+        # Atualiza o display
         pygame.display.flip()
+
+        # Controla a taxa de frames por segundo
         clock.tick(60)
 
     pygame.quit()
